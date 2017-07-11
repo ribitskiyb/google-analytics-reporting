@@ -18,6 +18,8 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 
 public class ReportDownloader {
 
@@ -53,13 +55,7 @@ public class ReportDownloader {
             fw.write("");
         }
 
-        Get request = analytics.data().ga()
-                .get(ids, startDate, endDate, metrics)
-                .setDimensions(dimensions)
-                .setSort(sort)
-                .setFilters(filters)
-                .setSegment(segment)
-                .setSamplingLevel(samplingLevel);
+        Get request = buildRequest(ids, startDate, endDate, metrics, dimensions, sort, filters, segment, samplingLevel);
 
         List<List<String>> data = fetchData(request);
 
@@ -69,6 +65,21 @@ public class ReportDownloader {
     private static final int MAX_RESULTS_PER_REQUEST = (int) 1e4;  // API limit on amount of rows returned for a single request
 
     private Analytics analytics;
+    
+    private Get buildRequest(String ids, String startDate, String endDate, String metrics,
+                             String dimensions, String sort, String filters, String segment, String samplingLevel)
+            throws IOException {
+        Get request = analytics.data().ga()
+                .get(ids, startDate, endDate, metrics);
+
+        if (!isBlank(dimensions))    request.setDimensions(dimensions);
+        if (!isBlank(sort))          request.setSort(sort);
+        if (!isBlank(filters))       request.setFilters(filters);
+        if (!isBlank(segment))       request.setSegment(segment);
+        if (!isBlank(samplingLevel)) request.setSamplingLevel(samplingLevel);
+
+        return request;
+    }
 
     // Fetches paginated data into a single collection
     private List<List<String>> fetchData(Get request) throws IOException {
@@ -100,7 +111,7 @@ public class ReportDownloader {
     }
 
     private void writeCSV(List<List<String>> data, String path, char separator) throws IOException {
-        try (CSVWriter writer = new CSVWriter(new FileWriter(path), separator);) {
+        try (CSVWriter writer = new CSVWriter(new FileWriter(path), separator)) {
             for (List<String> row : data) {
                 writer.writeNext(row.toArray(new String[0]));
             }
