@@ -84,8 +84,6 @@ public class ReportDownloader {
     // Fetches paginated data into a single collection
     private List<List<String>> fetchData(Get request) throws IOException {
         List<List<String>> fetched = new ArrayList<>();
-        // Reserve first row for headers
-        fetched.add(null);
 
         request.setMaxResults(MAX_RESULTS_PER_REQUEST);
         request.setStartIndex(1);
@@ -95,7 +93,7 @@ public class ReportDownloader {
             page = request.execute();
             fetched.addAll(page.getRows());
 
-            int fetchedRows = fetched.size() - 1;
+            int fetchedRows = fetched.size();
             int totalRows = page.getTotalResults();
             if (fetchedRows >= totalRows)
                 break;
