@@ -1,4 +1,4 @@
-package etl.cloud.google.adwords;
+package etl.cloud.google.analytics;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
