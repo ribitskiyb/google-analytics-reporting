@@ -111,6 +111,8 @@ public class ReportDownloader {
     private void writeCSV(List<List<String>> data, String path, char separator) throws IOException {
         try (CSVWriter writer = new CSVWriter(new FileWriter(path), separator)) {
             for (List<String> row : data) {
+                if (row == null)
+                    continue;
                 writer.writeNext(row.toArray(new String[0]));
             }
         }
