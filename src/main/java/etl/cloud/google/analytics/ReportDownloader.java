@@ -89,14 +89,28 @@ public class ReportDownloader {
         request.setStartIndex(1);
 
         GaData page;
+        Integer initialTotalRowsEstimate = null;
         while (true) {
             page = request.execute();
-            fetched.addAll(page.getRows());
+            List<List<String>> rows = page.getRows();
+            if (rows != null) {
+                fetched.addAll(rows);
+            } else {
+                System.out.printf(
+                        "ERROR: API returned less results then initially estimated -- %d/%d.%n" +
+                                "Try to decrease the amount of results by adjusting query parameters.",
+                        fetched.size(),
+                        initialTotalRowsEstimate);
+                System.exit(1);
+            }
 
             int fetchedRows = fetched.size();
-            int totalRows = page.getTotalResults();
-            if (fetchedRows >= totalRows)
+            if (initialTotalRowsEstimate == null) {
+                initialTotalRowsEstimate = page.getTotalResults();
+            }
+            if (fetchedRows >= initialTotalRowsEstimate) {
                 break;
+            }
             request.setStartIndex(fetchedRows + 1);
         }
 
