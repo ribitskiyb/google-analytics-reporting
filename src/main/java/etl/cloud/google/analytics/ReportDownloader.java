@@ -97,8 +97,8 @@ public class ReportDownloader {
                 fetched.addAll(rows);
             } else {
                 System.out.printf(
-                        "ERROR: API returned less results then initially estimated -- %d/%d.%n" +
-                                "Try to decrease the amount of results by adjusting query parameters.",
+                        "ERROR: API returned less results then initially estimated -- %d/%d%n" +
+                                "Try to decrease the amount of results by adjusting query parameters%n",
                         fetched.size(),
                         initialTotalRowsEstimate);
                 System.exit(1);
