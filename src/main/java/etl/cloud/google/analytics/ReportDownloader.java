@@ -10,6 +10,7 @@ import com.google.api.services.analytics.Analytics.Data.Ga.Get;
 import com.google.api.services.analytics.AnalyticsScopes;
 import com.google.api.services.analytics.model.GaData;
 import com.opencsv.CSVWriter;
+import etl.cloud.google.analytics.internal.UnexpectedRequestResultException;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -48,7 +49,7 @@ public class ReportDownloader {
 
     public void download(String ids, String startDate, String endDate, String metrics,
                          String dimensions, String sort, String filters, String segment, String samplingLevel,
-                         String outputFile) throws IOException {
+                         String outputFile) throws IOException, UnexpectedRequestResultException {
 
         // Fail early if outputFile can't be written
         try (FileWriter fw = new FileWriter(outputFile)) {
@@ -82,7 +83,7 @@ public class ReportDownloader {
     }
 
     // Fetches paginated data into a single collection
-    private List<List<String>> fetchData(Get request) throws IOException {
+    private List<List<String>> fetchData(Get request) throws IOException, UnexpectedRequestResultException {
         List<List<String>> fetched = new ArrayList<>();
 
         request.setMaxResults(MAX_RESULTS_PER_REQUEST);
@@ -96,12 +97,11 @@ public class ReportDownloader {
             if (rows != null) {
                 fetched.addAll(rows);
             } else {
-                System.out.printf(
-                        "ERROR: API returned less results then initially estimated -- %d/%d%n" +
+                throw new UnexpectedRequestResultException(String.format(
+                        "API returned less results then initially estimated -- %d/%d%n" +
                                 "Try to decrease the amount of results by adjusting query parameters%n",
                         fetched.size(),
-                        initialTotalRowsEstimate);
-                System.exit(1);
+                        initialTotalRowsEstimate));
             }
 
             int fetchedRows = fetched.size();
